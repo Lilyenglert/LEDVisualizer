@@ -1,5 +1,5 @@
 # LEDVisualizer
-### An Interactive LED Grid Music Visualizer with Arduino
+### An Interactive Music Visualizer with Arduino
 Lily Croskey-Englert, Nikki Bregman, Andrew Zee. 
 
 #### Project Description
