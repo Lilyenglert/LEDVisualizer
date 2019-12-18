@@ -2,7 +2,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
-#include <cmath> 
 
 // lighting pin
 #define PIN 18
@@ -36,9 +35,9 @@ int rThresh = scalar;
 int gThresh = scalar*3;
 
 
-int bMax = 2*scalar;
-int gMax = 4*scalar;
-int rMax = 6*scalar;
+int bMax = 500;
+int gMax = 1000;
+int rMax = 1500;
  
 arduinoFFT FFT = arduinoFFT();
  
@@ -61,50 +60,14 @@ int peakTotal;
 int totalSamples;
 int weightedAvg;
 
-const int irPin1 = 4;
-const int irPin2 = 25;
-const int irPin3 = 34;
-const int irPin4 = 39;
-const int irPin5 = 36;
-const int irPin6 = 5;
-const int irPin7 = 13;
-const int irPin8 = 12;
-const int irPin9 = 27;
-const int irPin10 = 33;
-const int irPin11 = 15;
-const int irPin12 = 32;
-
-const int IRS = 12;
-int IRsensors[IRS] = {irPin1, irPin2, irPin3, irPin4, irPin5, irPin6, irPin7, irPin8, irPin9, irPin10, irPin11, irPin12};
-
-float estimate = 0;
-
-int yTemp;
-
-
 void setup() {
     Serial.begin(9600);
  
     sampling_period_us = round(1000000*(1.0/SAMPLING_FREQUENCY));
     matrix.begin();
     matrix.setTextWrap(false);
-    matrix.setBrightness(15);
+    matrix.setBrightness(100);
 //    matrix.setTextColor(colors[0]);
-      Serial.begin(9600);
-    pinMode(irPin1, INPUT);
-    pinMode(irPin2, INPUT);
-    pinMode(irPin3, INPUT);
-    pinMode(irPin4, INPUT);
-    pinMode(irPin5, INPUT);
-    pinMode(irPin6, INPUT);
-    pinMode(irPin7, INPUT);
-    pinMode(irPin8, INPUT);
-    pinMode(irPin9, INPUT);
-    pinMode(irPin10, INPUT);
-    pinMode(irPin11, INPUT);
-    pinMode(irPin12, INPUT);
-    yTemp = 0;
-
 }
  
 void loop() {
@@ -167,101 +130,14 @@ void loop() {
     }
 //    Serial.println("WeightedAvg:");
 //    Serial.println(weightedAvg);
-
-    //  xAVG, Sum of the IR sensors that are activated
-  float xAVG = 0;
-// xTOT, the number of sensors activated
-  float xTOT = 0;
-//xAXIS avg of ir sensors
-  float xAXIS = 0;
-  float xPROP = 0;
-  int LEDcol = 0;
-
-  int yCount = 0;
-  float yTOT = 0;
-  float yAVG = 0;
-  int yAXIS = 0;
-
-  const int numVALS=12;
-  int values[numVALS]= {0,0,0,0,0,0,0,0,0,0,0,0};
-  
-  const int numAVGS = 10;
-  int AVGS[numAVGS];
-
-  int avgAVGS=0;
-  int stdAVGS=0;
-  int totAVGS=0;
-  int countAVGS=0;
-
-  for (int i = 0; i<IRS; i++){
-//    Serial.println(analogRead(IRsensors[i]));
     
-    if (retDist(analogRead(IRsensors[i]))<=(50)){
-      xAVG += i+1;
-      xTOT++;
-    }
-  }
-  if(xTOT>0){
-    xAXIS = xAVG/xTOT;
-    xPROP = xAXIS/12;
-    LEDcol = round(xPROP*33);
-    for (int j=0; j<10; j++){
-      for(int k=0; k<IRS; k++){
-        values[k]=0;
-        if(retDist(analogRead(IRsensors[k]))<=50){
-          values[k]=analogRead(IRsensors[k]);
-        }
-      }
-      for (int a=0; a<numVALS; a++){
-        if (values[a]>0){
-          yTOT+=values[a];
-          yCount++;
-        }
-      }
-      AVGS[j] = yTOT/yCount;
-      avgAVGS+=AVGS[j];
-      delay(10);
-    }
-    avgAVGS=avgAVGS/10;
-    for (int b=0; b<numAVGS; b++){
-      stdAVGS+= sq(AVGS[b]-avgAVGS);
-    }
-    stdAVGS = sqrt(stdAVGS/9);
-    for (int c=0; c<numAVGS; c++){
-      if (AVGS[c]<(avgAVGS + stdAVGS) and AVGS[c]>(avgAVGS-stdAVGS)){
-        totAVGS+= AVGS[c];
-        countAVGS++;
-      }
-    }
-    if (countAVGS == 0 or retLED(retDist((totAVGS/countAVGS)))>60){
-      yAXIS = yTemp;
-    }else{
-      yAVG = totAVGS/countAVGS;
-      yAXIS = retLED(retDist(yAVG));
-      if(((yAXIS-yTemp)<=2) and ((yTemp-yAXIS)<=2)){
-        yAXIS = yTemp;
-      }
-      yTemp = yAXIS;
-    }
-//    Serial.println("LEDcol");
-//    Serial.println(LEDcol);
-//    Serial.println("y-axis");
-//    Serial.println(yAXIS);
-  }
-    
-    delay(20);
+    delay(10);
 
     radius = volumetoRad(volAvg);
-
     
     matrix.fillScreen(matrix.Color(0, 0, 0));
     colorVals(weightedAvg);
-    if (LEDcol==0 and yAXIS==0){
-      matrix.fillCircle(16, 16, radius , matrix.Color(r,g, b));
-    }else{
-      matrix.fillCircle(LEDcol, yAXIS, radius, matrix.Color(r,g, b));
-    }
-
+    matrix.fillCircle(16, 16, radius , matrix.Color(r, g, b));
     matrix.show();
   
 
@@ -272,8 +148,7 @@ void loop() {
     weightedAvg = 0;
 }
     int volumetoRad(int vol) {
-//      Here
-      return 1+(vol)/225;
+      return vol/225;
     }
 
     void colorVals(int freq) {
@@ -293,14 +168,3 @@ void loop() {
     g= min(255,g);
 //    return (String(r) + ", " + String(g) + ", " + String(b));
 };
-
-float retDist(float volt){
-  return (((70/(volt/1000))-6.0));
-}
-
-
-int retLED(float cm){
-  estimate = ((cm-10)/1.209375);
-//  return round(estimate); //Theoretically more accurate but the closer to 15 we get the more inaccurate the IR becomes
-  return (estimate);
-}
