@@ -9,7 +9,7 @@ Dev note: The final code is in IR_attempt directory.
 
 #### Tools & Materials
 Code: This project was written in Arduino. The libraries we used in this project include the NeoPixel GFX & Neopixel Matrix libraries for lights, and ArduinoFFT for frequncy calculation. All other code was written by us. 
-3D Printing & Laser Cutting: Fusion 360 & illustrator for producing models. // input names of these
+Printing & Laser Cutting: Fusion 360 & illustrator for producing models.
 Interaction Design: Framer X was used for interaction design concepts. 
 
 
